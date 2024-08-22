@@ -1,19 +1,19 @@
 def p(A,er,ec):
     for r,l in enumerate(A):
         for c,e in enumerate(l):
-            if (r,c)==(er,ec):
-                print("@",end=' ')
+            if (r,c)==(er, ec):
+                print("@", end=' ')
                 continue
             if e==0:
-                print(".",end=' ')
+                print(".", end=' ')
             else:
                 print(e, end=' ')
         print()
     print()
 
 def solution():
-    R,C,K = map(int,input().split())
-    G=[]
+    R, C, K = map(int,input().split())
+    G = []
     for gi in range(K):
         c,d = map(int,input().split())
         G.append((gi+1,c-1,d))  # 골렘번호, 출발열, 방향
@@ -32,21 +32,23 @@ def solution():
                     continue
                 # west
                 if tmp_c > 1:
-                    check = 0
-                    for tr,tc in [(tmp_r-1,tmp_c-1),(tmp_r,tmp_c-2),(tmp_r+1,tmp_c-1),
-                                  (tmp_r+1,tmp_c-2),(tmp_r+2,tmp_c-1)]:
-                        check += A[tr][tc]
-                    if not check:
+                    check_flag=True
+                    for tr,tc in [(tmp_r-1,tmp_c-1),(tmp_r,tmp_c-2),(tmp_r+1,tmp_c-1),(tmp_r+1,tmp_c-2),(tmp_r+2,tmp_c-1)]:
+                        if A[tr][tc]!=0:
+                            check_flag=False
+                            break
+                    if check_flag:
                         gd = (gd-1 + 4)%4
                         tmp_c -= 1
                         continue
                 # east
                 if tmp_c < C-2:
-                    check = 0
-                    for tr, tc in [(tmp_r-1,tmp_c+1),(tmp_r,tmp_c+2),(tmp_r+1,tmp_c+1),
-                                   (tmp_r+1,tmp_c+2),(tmp_r+2,tmp_c+1)]:
-                        check += A[tr][tc]
-                    if not check:
+                    check_flag = True
+                    for tr, tc in [(tmp_r-1,tmp_c+1),(tmp_r,tmp_c+2),(tmp_r+1,tmp_c+1),(tmp_r+1,tmp_c+2),(tmp_r+2,tmp_c+1)]:
+                        if A[tr][tc]!=0:
+                            check_flag=False
+                            break
+                    if check_flag:
                         gd = (gd+1) % 4
                         tmp_c += 1
                         continue
@@ -61,19 +63,18 @@ def solution():
             A[tmp_r+dr[tmp_di]][tmp_c+dc[tmp_di]] = gi
         cur_gol_dict[gi] = (tmp_r,tmp_c,gd)
 
-        # SCORING !
+        # TODO -- DFS 다시 구현해보기(오류여지 없애보기)
         stack = [gi]
-        visit = set([gi])
+        visit = set()
+        visit.add(gi)
         max_row = 0
         while stack:
             cur_gi = stack.pop()
             center_r, center_c, gd = cur_gol_dict[cur_gi]
-
             if center_r == R:   # TODO "bottom-1 == R" index check
                 max_row = R
                 break
             exit_r, exit_c = center_r+dr[gd], center_c+dc[gd]
-
             dead_end_flag = True  # 지금 위치가 마지막임
             for tmp_di in range(4):
                 search_r, search_c = exit_r+dr[tmp_di], exit_c+dc[tmp_di]
@@ -85,11 +86,10 @@ def solution():
                         dead_end_flag = False
             if dead_end_flag:
                 max_row = max(max_row, center_r)
+        # p(A ,tmp_r+dr[gd], tmp_c+dc[gd])
         ROW_COUNTER += max_row
         # 1 golem end
     # for end (1 golem end)
-
     return ROW_COUNTER
-
 
 print(solution())
