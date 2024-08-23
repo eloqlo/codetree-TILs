@@ -1,5 +1,7 @@
 def p(A,er,ec):
     for r,l in enumerate(A):
+        if r<2:
+            continue
         for c,e in enumerate(l):
             if (r,c)==(er, ec):
                 print("@", end=' ')
@@ -24,7 +26,9 @@ def solution():
     ROW_COUNTER = 0
 
     for gi, c, gd in G:
+        #1 착지
         tmp_c = c
+        init_gd=gd
         for tmp_r in range(R+1):
             if tmp_r <= R-1:
                 # down
@@ -34,9 +38,10 @@ def solution():
                 if tmp_c > 1:
                     check_flag = True
                     for tr,tc in [(tmp_r-1,tmp_c-1),(tmp_r,tmp_c-2),(tmp_r+1,tmp_c-1),(tmp_r+1,tmp_c-2),(tmp_r+2,tmp_c-1)]:
-                        if A[tr][tc] != 0:
-                            check_flag = False
-                            break
+                        if tr >= 0 and tc >= 0:
+                            if A[tr][tc] != 0:
+                                check_flag = False
+                                break
                     if check_flag:
                         gd = (gd-1 + 4)%4
                         tmp_c -= 1
@@ -45,9 +50,10 @@ def solution():
                 if tmp_c < C-2:
                     check_flag = True
                     for tr, tc in [(tmp_r-1,tmp_c+1),(tmp_r,tmp_c+2),(tmp_r+1,tmp_c+1),(tmp_r+1,tmp_c+2),(tmp_r+2,tmp_c+1)]:
-                        if A[tr][tc]!=0:
-                            check_flag=False
-                            break
+                        if tr>=0 and tc>=0:
+                            if A[tr][tc]!=0:
+                                check_flag=False
+                                break
                     if check_flag:
                         gd = (gd+1) % 4
                         tmp_c += 1
@@ -58,7 +64,6 @@ def solution():
             A = [[0]*C for _ in range(R+2)]
             cur_gol_dict = {}
             continue
-
         A[tmp_r][tmp_c] = gi
         for tmp_di in range(4):
             if A[tmp_r+dr[tmp_di]][tmp_c+dc[tmp_di]]!=0:
@@ -66,7 +71,8 @@ def solution():
             A[tmp_r+dr[tmp_di]][tmp_c+dc[tmp_di]] = gi
         cur_gol_dict[gi] = (tmp_r,tmp_c,gd)
 
-        # TODO -- DFS 다시 오류여지 체크
+
+        #2 탈출
         stack = [gi]
         visit = set()
         visit.add(gi)
@@ -77,9 +83,9 @@ def solution():
             if center_r == R:   # TODO "bottom-1 == R" index check
                 max_row = R
                 break
-            exit_r, exit_c = center_r+dr[gd], center_c+dc[gd]
+            max_row = max(max_row, center_r)
+            exit_r, exit_c = center_r + dr[gd], center_c + dc[gd]
 
-            dead_end_flag = True  # 지금 위치가 마지막임
             for tmp_di in range(4):
                 search_r, search_c = exit_r+dr[tmp_di], exit_c+dc[tmp_di]
                 if 2<=search_r<=R+1 and 0<=search_c<=C-1:
@@ -87,11 +93,10 @@ def solution():
                         new_gi = A[search_r][search_c]
                         stack.append(new_gi)
                         visit.add(new_gi)
-                        dead_end_flag = False
-            if dead_end_flag:
-                max_row = max(max_row, center_r)
-        # p(A ,tmp_r+dr[gd], tmp_c+dc[gd])
-        # print("score ",max_row)
+
+        # p(A ,tmp_r+dr[cur_gol_dict[gi][-1]], tmp_c+dc[cur_gol_dict[gi][-1]])
+        # print(f"({gi}) score ",max_row,f"/ start col {c+1}/ start di {['북','동','남','서'][init_gd]}")
+        # print("-----------------------------------------")
         ROW_COUNTER += max_row
         # 1 golem end
     # for end (1 golem end)
